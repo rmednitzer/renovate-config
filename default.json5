@@ -1,51 +1,19 @@
 {
+  // Single source of truth is github>rmednitzer/infra:renovate-preset.
+  //
+  // This repository is the purpose-named home for the shared Renovate config,
+  // but the preset the fleet actually consumes has always lived in `infra`.
+  // Every one of the 17 consuming repositories extends the `infra` copy; none
+  // extended this one. That left this file as an unreferenced second source of
+  // truth, and it drifted: it still carried `lockFileMaintenance.automerge:
+  // true` after that setting was removed from the live preset, which is the
+  // setting that let a lockfile refresh cross a major boundary and break nous
+  // main on 2026-08-10.
+  //
+  // Rather than keep two copies in step by hand, this is now a thin re-export.
+  // Anything that extends `github>rmednitzer/renovate-config` resolves to the
+  // same config the rest of the fleet gets, and the two cannot drift again.
+  // Edit the policy in `infra/renovate-preset.json`.
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "config:best-practices",
-    ":semanticCommits",
-    ":timezone(Europe/Vienna)",
-    "schedule:weekly",
-  ],
-  labels: ["dependencies"],
-  prConcurrentLimit: 10,
-  prHourlyLimit: 2,
-  // Item 1: keep weekly lockfile maintenance, automerge it once required checks pass.
-  lockFileMaintenance: {
-    enabled: true,
-    schedule: ["before 5am on monday"],
-    automerge: true,
-  },
-  vulnerabilityAlerts: { labels: ["security"] },
-  osvVulnerabilityAlerts: true,
-  packageRules: [
-    {
-      // Item 1: automerge low-risk updates via GitHub native auto-merge (lands when checks pass).
-      description: "Automerge low-risk updates once checks pass.",
-      matchUpdateTypes: ["minor", "patch", "digest", "pin", "pinDigest"],
-      automerge: true,
-      platformAutomerge: true,
-    },
-    {
-      // Item 2: group ALL GitHub Actions updates (including majors) into one PR so they do not
-      // collide on the same workflow files. A group of only minor/patch/digest automerges via the
-      // rule above; a group that contains a major is not automerge-eligible and waits for review.
-      description: "Group all GitHub Actions updates into a single PR.",
-      matchManagers: ["github-actions"],
-      groupName: "github-actions",
-    },
-    {
-      description: "Group non-major Python dependency updates into a single PR.",
-      matchManagers: ["pep621", "pip_requirements", "pip-compile", "poetry", "setup-cfg"],
-      matchUpdateTypes: ["minor", "patch"],
-      groupName: "python dependencies",
-    },
-    {
-      // Major bumps of code deps stay separate, labelled, never automerge.
-      description: "Major dependency updates: separate, labelled, manual review.",
-      matchManagers: ["pep621", "pip_requirements", "pip-compile", "poetry", "setup-cfg", "npm", "cargo", "gomod"],
-      matchUpdateTypes: ["major"],
-      automerge: false,
-      labels: ["dependencies", "major-review"],
-    },
-  ],
+  extends: ["github>rmednitzer/infra:renovate-preset"],
 }
