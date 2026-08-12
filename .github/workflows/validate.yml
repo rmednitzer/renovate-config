@@ -1,0 +1,75 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate re-export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Schema and syntax check
+        run: npx --yes --package renovate -- renovate-config-validator --no-global --strict default.json5
+
+      # The point of this repository is that `github>rmednitzer/renovate-config`
+      # and `github>rmednitzer/infra:renovate-preset` resolve to the same
+      # policy. Syntax alone does not prove that: a valid file can still point
+      # at a preset that was renamed, moved, or deleted, and the failure would
+      # only surface as a broken Renovate run in a consuming repository.
+      # Unlike the bundled `config:*` presets, a `github>` preset is fetched
+      # over the GitHub API, so this needs a token even though rmednitzer/infra
+      # is public.
+      #
+      # It must be RENOVATE_GITHUB_COM_TOKEN, not RENOVATE_TOKEN. Under
+      # `--platform=local` the platform is not GitHub, so RENOVATE_TOKEN is the
+      # token for a platform that is not being contacted; github.com fetches
+      # for presets and changelogs read the github.com host rule instead. The
+      # default GITHUB_TOKEN is sufficient as the value, since any valid token
+      # can read a public repository.
+      - name: Preset resolution check
+        env:
+          RENOVATE_CONFIG_FILE: default.json5
+          RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx --yes --package renovate -- renovate --platform=local --dry-run=extract
+
+      # Guard the contract the README states: this file is a thin re-export and
+      # policy is edited in `infra`. Adding a rule here would recreate exactly
+      # the second source of truth that drifted and let lockFileMaintenance
+      # automerge a major into nous main on 2026-08-10.
+      - name: Assert the file stays a thin re-export
+        run: |
+          set -euo pipefail
+          npx --yes json5 default.json5 -o /tmp/default.json
+          expected='github>rmednitzer/infra:renovate-preset'
+
+          extends_len=$(jq '.extends | length' /tmp/default.json)
+          extends_val=$(jq -r '.extends[0] // ""' /tmp/default.json)
+          if [ "$extends_len" != "1" ] || [ "$extends_val" != "$expected" ]; then
+            echo "ERROR: extends must be exactly [\"$expected\"], got:"
+            jq -c '.extends' /tmp/default.json
+            exit 1
+          fi
+
+          # Only $schema and extends may appear. Anything else is policy, and
+          # policy belongs in infra/renovate-preset.json.
+          extra=$(jq -r 'keys - ["$schema","extends"] | .[]' /tmp/default.json)
+          if [ -n "$extra" ]; then
+            echo "ERROR: policy keys found in a file that must stay a re-export:"
+            echo "$extra" | sed 's/^/  /'
+            echo "Edit rmednitzer/infra:renovate-preset.json instead."
+            exit 1
+          fi
+
+          echo "OK: default.json5 is a faithful re-export of $expected"
