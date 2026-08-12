@@ -30,12 +30,18 @@ jobs:
       # only surface as a broken Renovate run in a consuming repository.
       # Unlike the bundled `config:*` presets, a `github>` preset is fetched
       # over the GitHub API, so this needs a token even though rmednitzer/infra
-      # is public. The default GITHUB_TOKEN is sufficient: any valid token can
-      # read a public repository.
+      # is public.
+      #
+      # It must be RENOVATE_GITHUB_COM_TOKEN, not RENOVATE_TOKEN. Under
+      # `--platform=local` the platform is not GitHub, so RENOVATE_TOKEN is the
+      # token for a platform that is not being contacted; github.com fetches
+      # for presets and changelogs read the github.com host rule instead. The
+      # default GITHUB_TOKEN is sufficient as the value, since any valid token
+      # can read a public repository.
       - name: Preset resolution check
         env:
           RENOVATE_CONFIG_FILE: default.json5
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx --yes --package renovate -- renovate --platform=local --dry-run=extract
 
       # Guard the contract the README states: this file is a thin re-export and
