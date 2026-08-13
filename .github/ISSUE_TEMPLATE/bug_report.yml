@@ -1,0 +1,59 @@
+name: Bug Report
+description: A Renovate run behaved unexpectedly in a repository that extends this preset
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for a Renovate run that went wrong. It is fine to file here
+        even if the root cause turns out to live in
+        `infra:renovate-preset` — the re-export and the policy are meant to be
+        the same thing, so either way this is the right place to start.
+
+        For a *proposed policy change* (a new grouping, a different schedule),
+        open a pull request against `infra` instead.
+  - type: input
+    id: consumer
+    attributes:
+      label: Affected repository
+      description: Which repository was Renovate running against?
+      placeholder: rmednitzer/example
+    validations:
+      required: true
+  - type: dropdown
+    id: entrypoint
+    attributes:
+      label: Which entry point does it extend?
+      options:
+        - "github>rmednitzer/infra:renovate-preset"
+        - "github>rmednitzer/renovate-config"
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should Renovate have done?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened
+      description: >-
+        Include the pull request that was opened or merged, and whether it
+        automerged.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Renovate run log
+      description: >-
+        The relevant excerpt from the Dependency Dashboard or the run log.
+        Redact any token before pasting.
+      render: shell
+    validations:
+      required: false

@@ -50,3 +50,38 @@ guaranteed to run, so there is nothing for auto-merge to wait on and it lands
 the PR immediately. Such a repo must override `platformAutomerge: false` so
 Renovate falls back to evaluating the checks that did report. `ai-stack` is the
 worked example.
+
+## This repository's own updates
+
+Two files, easy to confuse:
+
+| File | Read by | Purpose |
+|------|---------|---------|
+| `default.json5` | *consumers*, as a preset | The policy the fleet inherits |
+| `renovate.json5` | Renovate, for *this* repo | Keeps this repo's own action pins fresh |
+
+Renovate discovers repository config from `renovate.json`, `renovate.json5`,
+`.github/renovate.json*`, and `.renovaterc*`. `default.json5` is not in that
+list, so it is only ever resolved as a preset by repositories that extend it,
+never as this repository's own config. The two cannot shadow each other.
+
+`renovate.json5` exists because `validate.yml` pins its actions to full commit
+SHAs. A pinned SHA is correct, but with no manager watching it the pin never
+moves and quietly becomes a stale, unpatched version.
+
+**Nothing automerges here**, unlike the fleet default. This repository's `main`
+defines dependency policy for every consumer, so the property worth keeping is
+that every change to it was seen by a human — which is also what makes the
+`infra` F12 record of this repo's exposure ("unreviewed change rather than
+unreviewed merge") stay true. Update PRs are still raised, still grouped, and
+still gated by the release-age quarantine; only the unattended merge is off.
+
+## Repository documents
+
+| File | Purpose |
+|------|---------|
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Where a change belongs, and how to run the three CI checks locally |
+| [`SECURITY.md`](SECURITY.md) | Supply-chain threat model and private reporting channel |
+| [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Contributor Covenant 2.1 |
+| [`CLAUDE.md`](CLAUDE.md) | Working notes for AI assistants |
+| [`LICENSE`](LICENSE) / [`NOTICE`](NOTICE) | Apache-2.0 |

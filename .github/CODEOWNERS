@@ -1,0 +1,13 @@
+# CODEOWNERS — automatic reviewer assignment.
+# https://docs.github.com/en/repositories/managing-your-repositories-settings-and-customizations/customizing-your-repository/about-code-owners
+#
+# Lines are matched in order; the last matching pattern wins.
+
+* @rmednitzer
+
+# The re-export itself and the CI that guards it. A change to either can
+# redirect or silently widen fleet-wide dependency policy, so both are called
+# out explicitly rather than relying on the catch-all above.
+/default.json5        @rmednitzer
+/.github/workflows/   @rmednitzer
+/SECURITY.md          @rmednitzer

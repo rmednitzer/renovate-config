@@ -1,0 +1,16 @@
+# Node tooling. The CI workflow runs `npx --yes`, which resolves into a cache
+# rather than the working tree, but a local `npm i` would land these here.
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Renovate local runs (`renovate --platform=local`) write here.
+/renovate/
+/.renovate-cache/
+renovate-*.log
+
+# Editor and OS noise
+.DS_Store
+*.swp
+.idea/
+.vscode/

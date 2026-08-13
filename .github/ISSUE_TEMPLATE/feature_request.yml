@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest a change to this repository (not to the dependency policy)
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Policy changes go to `infra`.** Automerge rules, groupings,
+        schedules, release-age windows, and manager toggles are defined in
+        [`infra:renovate-preset`](https://github.com/rmednitzer/infra/blob/main/renovate-preset.json).
+        Adding any of them to `default.json5` here fails CI by design.
+
+        Use this template for the repository itself: the CI checks, the
+        documentation, or the re-export mechanism.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or capability you would like.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: >-
+            This is a change to the repository (CI, docs, re-export mechanism),
+            not to the dependency-update policy.
+          required: true

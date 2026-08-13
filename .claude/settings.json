@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes --package renovate -- renovate-config-validator:*)",
+      "Bash(npx --yes json5:*)",
+      "Bash(jq:*)",
+      "Bash(node --version)",
+      "Bash(npm --version)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gh/**)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(git push --force)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f)",
+      "Bash(git push -f:*)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)"
+    ]
+  }
+}
