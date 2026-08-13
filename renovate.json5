@@ -1,0 +1,37 @@
+{
+  // This repository's OWN dependency-update config. Not to be confused with
+  // `default.json5`, which is the preset this repository *publishes*.
+  //
+  // Renovate discovers repository config from `renovate.json`,
+  // `renovate.json5`, `.github/renovate.json*`, and `.renovaterc*`.
+  // `default.json5` is not in that list, so it is only ever read as a preset by
+  // repositories that extend it, never as this repository's own config. The two
+  // files cannot shadow each other.
+  //
+  // Why this file exists: the CI workflow pins `actions/checkout` and
+  // `actions/setup-node` to full commit SHAs. Pinned SHAs are correct, but
+  // without a manager watching them they never move, and the pin quietly
+  // becomes a stale, unpatched version. Every other repository in the fleet
+  // extends the shared preset for exactly this reason; this one was the gap.
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>rmednitzer/infra:renovate-preset"],
+
+  packageRules: [
+    {
+      // Deliberate deviation from the fleet default: nothing automerges here.
+      //
+      // This repository's `main` defines dependency-update policy for every
+      // consumer, so the property worth protecting is that *every* change to it
+      // was seen by a human. `infra`'s F12 evidence records the exposure here
+      // as "unreviewed change rather than unreviewed merge" precisely because
+      // nothing automerges. Turning on automerge for the two workflow pins
+      // would trade that property away for a saved click a few times a year.
+      //
+      // Update PRs are still raised, still grouped, and still gated by the
+      // shared release-age quarantine. Only the unattended merge is off.
+      description: "Never automerge into a repository that defines fleet-wide policy.",
+      matchPackageNames: ["*"],
+      automerge: false,
+    },
+  ],
+}
